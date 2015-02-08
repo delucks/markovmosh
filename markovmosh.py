@@ -10,6 +10,8 @@ import argparse
 class Markov():
     separator = '\x01'
     stop_word = '\x02'
+    input_corpus = ["minified-samples/36.txt","samples/udhr.txt","samples/gtfts.txt","samples/soc.txt","samples/sscb.txt"]
+    _inactive = ["../log.txt","minified-samples/lo.txt","minified-samples/bi.txt","minified-samples/li.txt"]
     
     def __init__(self, chain_length = 2, max_words = 30, gen_limit = 100):
         self.redis_conn = redis.Redis()
@@ -37,12 +39,12 @@ class Markov():
         key = seed
         gen_words = []
         for i in xrange(self.max_words):
-            words = key.split(self.separator)
-            gen_words.append(words[0])
-            next_word = self.redis_conn.srandmember(self.make_key(key))
-            if not next_word:
-                break
-            key = self.separator.join(words[1:] + [next_word])
+          words = key.split(self.separator)
+          gen_words.append(words[0])
+          next_word = self.redis_conn.srandmember(key)
+          if not next_word:
+              break
+          key = self.separator.join(words[1:] + [next_word])
         return ' '.join(gen_words)
 
     def read(self,f):
@@ -78,54 +80,54 @@ class Markov():
         words = user_input.split()
         if len(words) > self.chain_length:
           key = words[-self.chain_length:]
-          print ' '.join(words[:-self.chain_length]) + " " + self.generate('\x01'.join(key))
+          print ' '.join(words[:-self.chain_length]) + " " + self.generate(self.separator.join(key))
         else:
-          print self.generate('\x01'.join(user_input.split()))
+          print self.generate(self.separator.join(user_input.split()))
 
     def go(self,user_input):
         if user_input == "random":
           random = self.redis_conn.randomkey()
-          key = ''.join(random.split('-'))
-          print self.generate(key)
+          print self.generate(random)
         else:
           words = user_input.split()
           if len(words) > self.chain_length:
             key = words[-self.chain_length:]
-            print ' '.join(words[:-self.chain_length]) + " " + self.generate('\x01'.join(key))
+            print ' '.join(words[:-self.chain_length]) + " " + self.generate(self.separator.join(key))
           else:
-            print self.generate('\x01'.join(user_input.split()))
+            print self.generate(self.separator.join(user_input.split()))
 
     def search(self,query):
-      print self.redis_conn.keys(query)
+      return self.redis_conn.keys(query)
 
-    def setup(self):
-      with open("minified-samples/36.txt","r") as f: # wu-tang clan 36 chambers
-        self.read(f)
-      with open("samples/udhr.txt","r") as f: # universal declaration of human rights
-        self.read(f)
-      #with open("minified-samples/bi.txt","r") as f: # bible, king james
-      #  self.read(f)
-      with open("samples/gtfts.txt","r") as f: # go the fuck to sleep
-        self.read(f)
-      with open('samples/soc.txt','r') as f: # straight outta compton
-        self.read(f)
-      #with open('../log.txt','r') as f: # my irc logs
-      #  self.read(f)
-      with open('samples/sscb.txt','r') as f: # shell scripting cookbook
-        self.read(f)
+    def flush(self):
+      self.redis_conn.flushall()
 
-      #with open("minified-samples/lo.txt","r") as f:
-      #  m.read(f)
-      #with open("minified-samples/li.txt","r") as f:
-      #  m.read(f)
-            
-#p = argparse.ArgumentParser(description="create and train a markov text wrangler")
-#p.add_argument("board", help="the craigslist board you want to scrape", choices=BOARDLIST)
-#p.add_argument("-l", "--location", help="show location along with post title", action="store_true")
-#p.add_argument("-p", "--price", help="show price along with post title", action="store_true")
-#p.add_argument("-n", "--number", type=int, help="number of posts you want (be reasonable). defaults to 100", default=100)
-#args = p.parse_args()
+    def train(self,filenames):
+      # pass in filenames as a list. I'll read all of 'em
+      for path in filenames:
+        with open(path,"r") as f:
+          self.read(f)
+          print "Successfully read {path}!".format(path=path)
 
-m = Markov()
-m.setup()
-#m.go(sys.argv[1])
+p = argparse.ArgumentParser(description="Create and train a markov-chain based text wrangler. Assumes a running redis instance on localhost")
+p.add_argument("-s", "--seed", help="a $chain-length word phrase to seed the generator with. defaults to random")
+p.add_argument("-t", "--train", help="specify a file to train the text generator with")
+p.add_argument("-k", "--key", help="search for a key in the redis store")
+p.add_argument("-f", "--flush", help="drop all keys in the redis store, start again with training", action="store_true")
+p.add_argument("--max-words", help="the most words that will be generated in a resulting message", default=30)
+p.add_argument("--gen-limit", help="the most messages that the generator will select from", default=100)
+args = p.parse_args()
+
+m = Markov(max_words=args.max_words,gen_limit=args.gen_limit)
+
+if args.key:
+  for item in m.search(args.key):
+    print ' '.join(item.split(m.separator))
+elif args.flush:
+  m.flush()
+elif args.train:
+  m.train([args.train]) # TODO: Allow support for multiple files right after each other, and shell globbing
+elif args.seed:
+  m.go(args.seed)
+else:
+  m.go("random")
