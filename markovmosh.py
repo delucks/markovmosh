@@ -2,7 +2,6 @@
 import random
 import re
 import redis
-import sys
 import argparse
 
 # based on coleifer's irc bot. will be modifying moar
@@ -17,7 +16,7 @@ class Markov():
 		input_corpus = ["minified-samples/36.txt","samples/udhr.txt","samples/gtfts.txt","samples/soc.txt","samples/sscb.txt"]
 		_inactive = ["../log.txt","minified-samples/lo.txt","minified-samples/bi.txt","minified-samples/li.txt"]
 		
-		def __init__(self, chain_length = 2, max_words = 30, gen_limit = 100):
+		def __init__(self, max_words, gen_limit, chain_length = 2):
 				self.redis_conn = redis.Redis()
 				self.chain_length = chain_length
 				self.max_words = max_words
@@ -99,25 +98,29 @@ class Markov():
 					self.read(f)
 					print "{green}[::]{reset} Successfully read {path}!".format(green=self.print_green,reset=self.print_reset,path=path)
 
-p = argparse.ArgumentParser(description="Create and train a markov-chain based text wrangler. Assumes a running redis instance on localhost")
-p.add_argument("-s", "--seed", help="a $chain-length word phrase to seed the generator with. defaults to random")
-p.add_argument("-t", "--train", help="specify a file to train the text generator with")
-p.add_argument("-k", "--key", help="search for a key in the redis store")
-p.add_argument("-f", "--flush", help="drop all keys in the redis store, start again with training", action="store_true")
-p.add_argument("--max-words", help="the most words that will be generated in a resulting message", default=30)
-p.add_argument("--gen-limit", help="the most messages that the generator will select from", default=100)
-args = p.parse_args()
+def main():
+    p = argparse.ArgumentParser(description="Create and train a markov-chain based text wrangler. Assumes a running redis instance on localhost")
+    p.add_argument("-s", "--seed", help="a $chain-length word phrase to seed the generator with. defaults to random")
+    p.add_argument("-t", "--train", help="specify a file to train the text generator with")
+    p.add_argument("-k", "--key", help="search for a key in the redis store")
+    p.add_argument("-f", "--flush", help="drop all keys in the redis store, start again with training", action="store_true")
+    p.add_argument("-m", "--max-words", help="the most words that will be generated in a resulting message", default=30)
+    p.add_argument("--gen-limit", help="the most messages that the generator will select from", default=100)
+    args = p.parse_args()
 
-m = Markov(max_words=args.max_words,gen_limit=args.gen_limit)
+    m = Markov(args.max_words,args.gen_limit)
 
-if args.key:
-	for item in m.search(args.key):
-		print ' '.join(item.split(m.separator))
-elif args.flush:
-	m.flush()
-elif args.train:
-	m.train([args.train]) # TODO: Allow support for multiple files right after each other, and shell globbing
-elif args.seed:
-	m.go(args.seed)
-else:
-	m.go("random")
+    if args.key:
+        for item in m.search(args.key):
+            print ' '.join(item.split(m.separator))
+    elif args.flush:
+        m.flush()
+    elif args.train:
+        m.train([args.train]) # TODO: Allow support for multiple files right after each other, and shell globbing
+    elif args.seed:
+        m.go(args.seed)
+    else:
+        m.go("random")
+
+if (__name__=='__main__'):
+    main()
