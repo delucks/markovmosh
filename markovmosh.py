@@ -41,7 +41,7 @@ class Markov():
 		def generate_message(self, seed):
 				key = seed
 				gen_words = []
-				for i in xrange(self.max_words):
+				for i in range(self.max_words):
 					words = key.split(self.separator)
 					gen_words.append(words[0])
 					next_word = self.redis_conn.srandmember(key)
@@ -105,10 +105,10 @@ def main():
     p.add_argument("-k", "--key", help="search for a key in the redis store")
     p.add_argument("-f", "--flush", help="drop all keys in the redis store, start again with training", action="store_true")
     p.add_argument("-m", "--max-words", help="the most words that will be generated in a resulting message", default=30)
-    p.add_argument("--gen-limit", help="the most messages that the generator will select from", default=100)
+    p.add_argument("-g", "--gen-limit", help="the most messages that the generator will select from", default=100)
     args = p.parse_args()
 
-    m = Markov(args.max_words,args.gen_limit)
+    m = Markov(int(args.max_words),int(args.gen_limit))
 
     if args.key:
         for item in m.search(args.key):
