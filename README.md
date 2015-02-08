@@ -44,3 +44,11 @@ Get advanced help
 ```
 $ ./markovmosh.py -h
 ```
+
+## Examples
+
+##### "Pride & Prejudice" + "36 Chambers" + "Straight Outta Compton"
+
+"Sophisticated motherfuckers hear what has happened this morning? Mr. Collins by Janes letter last wednesday that her cousins manners were very unfit to have his errors made public might ruin him in company four times. This is quite shocking!"
+
+"So fuck the police, always got somethin stupid to say or sense of obligation for the long-expected ball at Netherfield."
