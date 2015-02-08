@@ -47,6 +47,16 @@ $ ./markovmosh.py -h
 
 ## Examples
 
+##### All Buzzfeed Article Titles
+
+"13 Utterly Disappointing Facts about Chipotle"
+
+"The 21 Worst Fashion Trends that Died at a Restaurant"
+
+"The 21 Realest tumblr Posts about being Seduced by a Thousand Roses for Valentine's Day"
+
+"15 Great Photos of Justin Biebers Mugshot Morphing into Miley Cyrus caught going Commando (NSFW)"
+
 ##### "Pride & Prejudice" + "36 Chambers" + "Straight Outta Compton"
 
 "Sophisticated motherfuckers hear what has happened this morning? Mr. Collins by Janes letter last wednesday that her cousins manners were very unfit to have his errors made public might ruin him in company four times. This is quite shocking!"
