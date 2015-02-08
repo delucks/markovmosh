@@ -1,9 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 import random
 import re
 import redis
 import sys
 import argparse
+
+# based on coleifer's irc bot. will be modifying moar
 
 class Markov():
     chain_length = 2
@@ -37,28 +39,14 @@ class Markov():
     
     def generate_message(self, seed):
         key = seed
-        
-        # keep a list of words we've seen
         gen_words = []
-        
-        # only follow the chain so far, up to <max words>
         for i in xrange(self.max_words):
-        # split the key on the separator to extract the words -- the key
-            # might look like "this\x01is" and split out into ['this', 'is']
             words = key.split(self.separator)
-            
-            # add the word to the list of words in our generated message
             gen_words.append(words[0])
-            
-            # get a new word that lives at this key -- if none are present we've
-            # reached the end of the chain and can bail
             next_word = self.redis_conn.srandmember(self.make_key(key))
             if not next_word:
                 break
-            
-            # create a new key combining the end of the old one and the next_word
             key = self.separator.join(words[1:] + [next_word])
-
         return ' '.join(gen_words)
 
     def read(self,f):
@@ -114,32 +102,32 @@ class Markov():
       print self.redis_conn.keys(query)
 
     def setup(self):
-      with open("36.txt","r") as f: # wu-tang clan 36 chambers
+      with open("minified-samples/36.txt","r") as f: # wu-tang clan 36 chambers
         self.read(f)
-      with open("udhr.txt","r") as f: # universal declaration of human rights
+      with open("samples/udhr.txt","r") as f: # universal declaration of human rights
         self.read(f)
-      #with open("bi.txt","r") as f: # bible, king james
+      #with open("minified-samples/bi.txt","r") as f: # bible, king james
       #  self.read(f)
-      with open("gtfts.txt","r") as f: # go the fuck to sleep
+      with open("samples/gtfts.txt","r") as f: # go the fuck to sleep
         self.read(f)
-      with open('soc.txt','r') as f: # straight outta compton
+      with open('samples/soc.txt','r') as f: # straight outta compton
         self.read(f)
-      #with open('log.txt','r') as f: # my irc logs
+      #with open('../log.txt','r') as f: # my irc logs
       #  self.read(f)
-      with open('sscb.txt','r') as f: # shell scripting cookbook
+      with open('samples/sscb.txt','r') as f: # shell scripting cookbook
         self.read(f)
 
-      #with open("lo.txt","r") as f:
+      #with open("minified-samples/lo.txt","r") as f:
       #  m.read(f)
-      #with open("li.txt","r") as f:
+      #with open("minified-samples/li.txt","r") as f:
       #  m.read(f)
             
-p = argparse.ArgumentParser(description="create and train a markov text wrangler")
-p.add_argument("board", help="the craigslist board you want to scrape", choices=BOARDLIST)
-p.add_argument("-l", "--location", help="show location along with post title", action="store_true")
-p.add_argument("-p", "--price", help="show price along with post title", action="store_true")
-p.add_argument("-n", "--number", type=int, help="number of posts you want (be reasonable). defaults to 100", default=100)
-args = p.parse_args()
+#p = argparse.ArgumentParser(description="create and train a markov text wrangler")
+#p.add_argument("board", help="the craigslist board you want to scrape", choices=BOARDLIST)
+#p.add_argument("-l", "--location", help="show location along with post title", action="store_true")
+#p.add_argument("-p", "--price", help="show price along with post title", action="store_true")
+#p.add_argument("-n", "--number", type=int, help="number of posts you want (be reasonable). defaults to 100", default=100)
+#args = p.parse_args()
 
 
 m = Markov()
