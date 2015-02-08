@@ -101,7 +101,7 @@ class Markov():
 def main():
     p = argparse.ArgumentParser(description="Create and train a markov-chain based text wrangler. Assumes a running redis instance on localhost")
     p.add_argument("-s", "--seed", help="a $chain-length word phrase to seed the generator with. defaults to random")
-    p.add_argument("-t", "--train", help="specify a file to train the text generator with")
+    p.add_argument("-t", "--train", help="specify a file to train the text generator with", nargs='+')
     p.add_argument("-k", "--key", help="search for a key in the redis store")
     p.add_argument("-f", "--flush", help="drop all keys in the redis store, start again with training", action="store_true")
     p.add_argument("-m", "--max-words", help="the most words that will be generated in a resulting message", default=30)
@@ -116,7 +116,7 @@ def main():
     elif args.flush:
         m.flush()
     elif args.train:
-        m.train([args.train]) # TODO: Allow support for multiple files right after each other, and shell globbing
+        m.train(args.train)
     elif args.seed:
         m.go(args.seed)
     else:

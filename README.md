@@ -21,10 +21,10 @@ Give it a seed of chain-length (hardcoded in the file, change if you want)
 $ ./markovmosh.py -s 'wu-tang clan'
 ```
 
-Train your bot (add text files to its chain database) by invoking
+Train your bot (add text files to its chain database). This command supports shell globbing and multiple arguments.
 
 ```
-$ ./markovmosh.py -t /path/to/my/large/text.file
+$ ./markovmosh.py -t /path/to/my/text/file/dir/*
 ```
 
 Search for a key in the bot's memory
