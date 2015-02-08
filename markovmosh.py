@@ -69,21 +69,6 @@ class Markov():
       if len(messages):
         return random.choice(messages)
 
-    def run(self):
-      while True:
-        user_input = raw_input("? ")
-        if user_input == "random":
-          random = self.redis_conn.randomkey()
-          key = ''.join(random.split('-'))
-          print self.generate(key)
-          continue
-        words = user_input.split()
-        if len(words) > self.chain_length:
-          key = words[-self.chain_length:]
-          print ' '.join(words[:-self.chain_length]) + " " + self.generate(self.separator.join(key))
-        else:
-          print self.generate(self.separator.join(user_input.split()))
-
     def go(self,user_input):
         if user_input == "random":
           random = self.redis_conn.randomkey()
