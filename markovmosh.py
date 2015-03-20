@@ -4,8 +4,6 @@ import re
 import redis
 import argparse
 
-# based on coleifer's irc bot. will be modifying moar
-
 class Markov():
         separator = '\x01'
         stop_word = '\x02'
@@ -13,8 +11,6 @@ class Markov():
         print_green = '\x1b[32m'
         print_yellow = '\x1b[33m'
         print_reset = '\x1b[39;49m'
-        input_corpus = ["minified-samples/36.txt","samples/udhr.txt","samples/gtfts.txt","samples/soc.txt","samples/sscb.txt"]
-        _inactive = ["../log.txt","minified-samples/lo.txt","minified-samples/bi.txt","minified-samples/li.txt"]
         
         def __init__(self, max_words, gen_limit, chain_length = 2):
                 self.redis_conn = redis.Redis()
